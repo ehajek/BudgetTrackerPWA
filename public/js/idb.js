@@ -1,10 +1,10 @@
 let db;
 
-const request = indexedDB.open('budget', 1);
+const request = indexedDB.open('budget', 1,);
 
 request.onupgradeneeded = function (event) {
     const db = event.target.result;
-    db.createObjectStore('Transaction', { autoIncrement: true });
+    db.createObjectStore('budget_track', { autoIncrement: true });
 };
 
 request.onsuccess = function (event) {
@@ -19,14 +19,15 @@ request.onerror = function (event) {
 };
 
 function saveRecord(record) {
-    const transaction = db.transaction(['pending'], 'readwrite');
-    const transactionObjectStore = transaction.objectStore('pending');
+    const transaction = db.transaction(["budget_track"], "readwrite");
+    const transactionObjectStore = transaction.objectStore('budget_track');
     transactionObjectStore.add(record);
 }
 
-function uploadTransaction() {
-    const transaction = db.transaction(['pending'], 'readwrite');
-    const transactionObjectStore = transaction.objectStore('pending');
+async function uploadTransaction() {
+    console.log("upload Trans Working");
+    const transaction = db.transaction(["budget_track"], "readwrite");
+    const transactionObjectStore = transaction.objectStore('budget_track');
 
     const getAll = transactionObjectStore.getAll();
 
@@ -40,21 +41,26 @@ function uploadTransaction() {
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => response.json())
-                .then(() => {
-                    const transaction = db.transaction(["pending"], "readwrite");
-
-                    const store = transaction.objectStore("pending");
-
-                    store.clear();
-                })
-
-                .catch(err => {
-                    console.log(err);
-                });
+            .then(response => response.json())
+            .then(serverResponse => {
+              if (serverResponse.message) {
+                throw new Error(serverResponse);
+              }
+    
+              const transaction = db.transaction(['budget_track'], 'readwrite');
+              const budgetObjectStore = transaction.objectStore('budget_track');
+              // clear all items in your store
+              budgetObjectStore.clear();
+              let errorEl = document.querySelector(".form .error");
+              alert("Back Online, Uploading Transactions");
+              document.location.replace('/');
+            })
+            .catch(err => {
+              // set reference to redirect back here
+              console.log(err);
+            });
         }
-    };
-}
-
+      };
+    }
 // listen for app coming back online
 window.addEventListener('online', uploadTransaction);

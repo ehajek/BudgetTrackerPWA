@@ -132,6 +132,11 @@ function sendTransaction(isAdding) {
       // clear form
       nameEl.value = "";
       amountEl.value = "";
+      if (isAdding) {
+        errorEl.textContent = "Transaction added";
+      } else {
+        errorEl.textContent = "Transaction subtracted";
+      }
     }
   })
   .catch(err => {
@@ -141,7 +146,15 @@ function sendTransaction(isAdding) {
     // clear form
     nameEl.value = "";
     amountEl.value = "";
-  });
+
+      // announce local transaction createad
+      if (isAdding) {
+        errorEl.textContent = "No Internet - Add Transaction saved locally";
+      } else {
+        errorEl.textContent = "No Internet - Subtract Transaction saved locally";
+      }
+
+    });
 }
 
 document.querySelector("#add-btn").onclick = function() {
